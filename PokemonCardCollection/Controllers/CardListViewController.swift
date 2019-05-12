@@ -8,6 +8,8 @@
 
 import UIKit
 import CoreData
+import Alamofire
+import SwiftyJSON
 
 class CardListViewController: UITableViewController {
     
@@ -17,25 +19,18 @@ class CardListViewController: UITableViewController {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
+    let baseURL = "https://api.pokemontcg.io/v1/cards"
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
-        var tempCard = Card(context: context)
-        tempCard.name = "Bulbasaur"
-        tempCard.id = "base1-44"
-        
-        cardArray.append(tempCard)
-        
-        var tempCard2 = Card(context: context)
-        tempCard2.name = "Charmander"
-        tempCard2.id = "base1-46"
-        
-        cardArray.append(tempCard2)
-        
-        tableView.reloadData()
+
+    
+        //let endURL = "?setCode=base1&name=char"
+        let endURL = "?setCode=base1"
+        let finalURL = baseURL + endURL
+        print(finalURL)
+        getData(url: finalURL)
         
     }
     
@@ -57,5 +52,49 @@ class CardListViewController: UITableViewController {
     }
     
     //MARK: - Tableview Delegate Methods
+    
+    
+    
+    //MARK: - Networking
+    
+    func getData (url: String) {
+        
+        Alamofire.request(url, method: .get).responseJSON { response in
+            if response.result.isSuccess {
+                //print("Success! Got the pokemon data")
+                let cardsJSON : JSON = JSON(response.result.value!)["cards"]
+                
+                self.updateCardData(json: cardsJSON)
+                
+            } else {
+                print("Error: \(String(describing: response.result.error))")
+            }
+            
+            
+        }
+    }
+    
+    //MARK: - JSON Parsing
+    
+    func updateCardData (json : JSON) {
+        var newCardArray = [Card]()
+        //print(cardsJSON)
+        
+        for (_,card):(String, JSON) in json {
+            //print(card)
+            let newCard = Card(context: self.context)
+            newCard.name = card["name"].stringValue
+            newCard.id = card["id"].stringValue
+            newCard.number = card["number"].int64Value
+            
+            newCardArray.append(newCard)
+        }
+        let sortedNewCardArray = newCardArray.sorted {  $0.number < $1.number  }
+        
+        self.cardArray = sortedNewCardArray
+        
+        self.tableView.reloadData()
+    }
+    
     
 }
