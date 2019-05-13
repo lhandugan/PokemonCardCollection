@@ -25,7 +25,6 @@ class SetListViewController : UITableViewController {
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
         loadCardSets()
-        
     }
     
     
@@ -47,6 +46,7 @@ class SetListViewController : UITableViewController {
     
     
     //MARK: - Tableview Delegate Methods
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToCards", sender: self)
     }
@@ -83,85 +83,68 @@ class SetListViewController : UITableViewController {
     //MARK: - JSON handling
     
     func updateCardSetData (json : JSON) {
-        var newCardSetArray = [CardSet]()
         //print(json)
         
         for (_,cardSet):(String, JSON) in json["sets"] {
             //print(cardSet)
-            let newCardSet = CardSet(context: self.context)
-            newCardSet.name = cardSet["name"].stringValue
-            newCardSet.code = cardSet["code"].stringValue
-            newCardSet.totalCards = cardSet["totalCards"].int64Value
-            newCardSet.symbolUrl = cardSet["symbolUrl"].stringValue
-            newCardSet.logoUrl = cardSet["logoUrl"].stringValue
-            
-            let releaseDateFormatter = DateFormatter()
-            releaseDateFormatter.dateFormat = "MM/dd/yyyy"
-            releaseDateFormatter.locale = Locale(identifier: "en_US_POSIX")
-            
-            newCardSet.releaseDate = releaseDateFormatter.date(from: cardSet["releaseDate"].stringValue)
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
-            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-            
-            newCardSet.updatedAt = dateFormatter.date(from: cardSet["updatedAt"].stringValue)
-            
-            
-            
-            print(newCardSet.code!)
-            print(newCardSet.releaseDate!)
-            print(newCardSet.updatedAt!)
-            
-            
-            newCardSetArray.append(newCardSet)
+
+            let newUpdatedAt = dateFromString(cardSet["updatedAt"].stringValue)
+
+            // Check if cardSet is already in CoreData
+            if let index = cardSetArray.firstIndex(where: {$0.code == cardSet["code"].stringValue} ) {
+                // Check if cardSet has been updated since last loaded
+                if cardSetArray[index].updatedAt! < newUpdatedAt {
+                    cardSetArray[index].updatedAt = newUpdatedAt
+                    cardSetArray[index].needToUpdate = true
+                }
+            } else {
+                let newCardSet = createNewCardSet(cardSet)
+                cardSetArray.append(newCardSet)
+            }
         }
+
+        cardSetArray.sort { $0.releaseDate! < $1.releaseDate! }
         
-        
-        
-        
-//        for newCardSet : CardSet in newCardSetArray {
-//
-//            if let index = cardSetArray.firstIndex(where: { $0.code == newCardSet.code }) {
-//                let oldUpdatedAt = cardSetArray[index].updatedAt!
-//                let newUpdatedAt = newCardSet.updatedAt!
-//
-//
-//                let dateFormatter = DateFormatter()
-//                dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
-//                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-//
-//                let oldDate = dateFormatter.date(from: oldUpdatedAt)
-//                let newDate = dateFormatter.date(from: newUpdatedAt)
-//
-//                if oldDate != newDate {
-//                    cardSetArray[index].needToUpdate = true
-//                }
-//
-//            } else {
-//
-//            }
-        
-//        }
-        
-        
-        
-        
-        //let sortedNewCardSetArray = newCardSetArray.sorted {  $0.releaseDate < $1.releaseDate  }
-        
-        self.cardSetArray = newCardSetArray
-        
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error saving sets, \(error)")
-        }
-        
-        self.tableView.reloadData()
+        saveCardSets()
     }
     
-    //MARK: -
+    func createNewCardSet (_ cardSet: JSON) -> CardSet {
+        let newCardSet = CardSet(context: context)
+        newCardSet.code = cardSet["code"].stringValue
+        newCardSet.name = cardSet["name"].stringValue
+        newCardSet.totalCards = cardSet["totalCards"].int64Value
+        newCardSet.symbolUrl = cardSet["symbolUrl"].stringValue
+        newCardSet.logoUrl = cardSet["logoUrl"].stringValue
+        newCardSet.needToUpdate = true
+        newCardSet.updatedAt = dateFromString(cardSet["updatedAt"].stringValue)
+        newCardSet.releaseDate = releaseDateFromString(cardSet["releaseDate"].stringValue)
+        
+        return newCardSet
+    }
+    
+    
+    func dateFromString (_ dateString: String) -> Date {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        return dateFormatter.date(from: dateString)!
+    }
+    
+    func releaseDateFromString (_ dateString: String) -> Date {
+        
+        let releaseDateFormatter = DateFormatter()
+        releaseDateFormatter.dateFormat = "MM/dd/yyyy"
+        releaseDateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        return releaseDateFormatter.date(from: dateString)!
+        
+    }
+    
+    
+    
+    //MARK: - CoreData
     
     func loadCardSets (with request: NSFetchRequest<CardSet> = CardSet.fetchRequest()) {
         
@@ -176,7 +159,16 @@ class SetListViewController : UITableViewController {
         tableView.reloadData()
     }
     
-    
+    func saveCardSets() {
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error saving sets, \(error)")
+        }
+        
+        tableView.reloadData()
+    }
     
     
     @IBAction func ReloadButtonPressed(_ sender: UIBarButtonItem) {
