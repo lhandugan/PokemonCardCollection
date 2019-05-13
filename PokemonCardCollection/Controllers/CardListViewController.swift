@@ -25,11 +25,18 @@ class CardListViewController: UITableViewController {
 
     
         //let endURL = "?setCode=base1&name=char"
-        let endURL = "?setCode=base1"
+        //let endURL = "?setCode=base1"
         //let endURL = "/xy7-54" //probably not going to do this here
-        let finalURL = baseURL + endURL
-        print(finalURL)
-        getData(url: finalURL)
+        
+        
+        if  let setCode = selectedCardSet?.code {
+            let endURL = "?setCode=\(setCode)"
+            let finalURL = baseURL + endURL
+            print(finalURL)
+            getData(url: finalURL)
+        }
+        
+        
         
     }
     

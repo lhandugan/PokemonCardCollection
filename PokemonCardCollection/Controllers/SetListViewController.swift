@@ -89,10 +89,14 @@ class SetListViewController : UITableViewController {
         //print(json)
         
         for (_,cardSet):(String, JSON) in json["sets"] {
-            //print(cardSet)
+            print(cardSet)
             let newCardSet = CardSet(context: self.context)
             newCardSet.name = cardSet["name"].stringValue
             newCardSet.releaseDate = cardSet["releaseDate"].stringValue
+            newCardSet.totalCards = cardSet["totalCards"].int64Value
+            newCardSet.updatedAt = cardSet["updatedAt"].stringValue
+            newCardSet.code = cardSet["code"].stringValue
+            
             
             newCardSetArray.append(newCardSet)
         }
