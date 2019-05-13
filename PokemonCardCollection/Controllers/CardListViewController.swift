@@ -23,10 +23,6 @@ class CardListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-    
-        //let endURL = "?setCode=base1&name=char"
-        //let endURL = "?setCode=base1"
-        //let endURL = "/xy7-54" //probably not going to do this here
         
         
         if  let setCode = selectedCardSet?.code {

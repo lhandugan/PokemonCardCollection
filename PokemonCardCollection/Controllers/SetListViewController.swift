@@ -22,13 +22,9 @@ class SetListViewController : UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        var tempCardSet = CardSet(context: context)
-//        tempCardSet.name = "Base"
-//
-//        cardSetArray.append(tempCardSet)
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        let finalURL = baseURL
-        getData(url: finalURL)
+        loadCardSets()
         
     }
     
@@ -68,14 +64,14 @@ class SetListViewController : UITableViewController {
     
     //MARK: - Networking
     
-    func getData (url: String) {
+    func getCardSetData (url: String) {
         
         Alamofire.request(url, method: .get).responseJSON { response in
             if response.result.isSuccess {
-                //print("Success! Got the pokemon data")
+                print("Success! Got the pokemon data")
                 let responseJSON : JSON = JSON(response.result.value!)
                 
-                self.updateData(json: responseJSON)
+                self.updateCardSetData(json: responseJSON)
                 
             } else {
                 print("Error: \(String(describing: response.result.error))")
@@ -84,28 +80,107 @@ class SetListViewController : UITableViewController {
         }
     }
     
-    func updateData (json : JSON) {
+    //MARK: - JSON handling
+    
+    func updateCardSetData (json : JSON) {
         var newCardSetArray = [CardSet]()
         //print(json)
         
         for (_,cardSet):(String, JSON) in json["sets"] {
-            print(cardSet)
+            //print(cardSet)
             let newCardSet = CardSet(context: self.context)
             newCardSet.name = cardSet["name"].stringValue
-            newCardSet.releaseDate = cardSet["releaseDate"].stringValue
-            newCardSet.totalCards = cardSet["totalCards"].int64Value
-            newCardSet.updatedAt = cardSet["updatedAt"].stringValue
             newCardSet.code = cardSet["code"].stringValue
+            newCardSet.totalCards = cardSet["totalCards"].int64Value
+            newCardSet.symbolUrl = cardSet["symbolUrl"].stringValue
+            newCardSet.logoUrl = cardSet["logoUrl"].stringValue
+            
+            let releaseDateFormatter = DateFormatter()
+            releaseDateFormatter.dateFormat = "MM/dd/yyyy"
+            releaseDateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            
+            newCardSet.releaseDate = releaseDateFormatter.date(from: cardSet["releaseDate"].stringValue)
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            
+            newCardSet.updatedAt = dateFormatter.date(from: cardSet["updatedAt"].stringValue)
+            
+            
+            
+            print(newCardSet.code!)
+            print(newCardSet.releaseDate!)
+            print(newCardSet.updatedAt!)
             
             
             newCardSetArray.append(newCardSet)
         }
         
+        
+        
+        
+//        for newCardSet : CardSet in newCardSetArray {
+//
+//            if let index = cardSetArray.firstIndex(where: { $0.code == newCardSet.code }) {
+//                let oldUpdatedAt = cardSetArray[index].updatedAt!
+//                let newUpdatedAt = newCardSet.updatedAt!
+//
+//
+//                let dateFormatter = DateFormatter()
+//                dateFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
+//                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+//
+//                let oldDate = dateFormatter.date(from: oldUpdatedAt)
+//                let newDate = dateFormatter.date(from: newUpdatedAt)
+//
+//                if oldDate != newDate {
+//                    cardSetArray[index].needToUpdate = true
+//                }
+//
+//            } else {
+//
+//            }
+        
+//        }
+        
+        
+        
+        
         //let sortedNewCardSetArray = newCardSetArray.sorted {  $0.releaseDate < $1.releaseDate  }
         
         self.cardSetArray = newCardSetArray
         
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error saving sets, \(error)")
+        }
+        
         self.tableView.reloadData()
     }
     
+    //MARK: -
+    
+    func loadCardSets (with request: NSFetchRequest<CardSet> = CardSet.fetchRequest()) {
+        
+        do {
+            cardSetArray = try context.fetch(request)
+            cardSetArray.sort { $0.releaseDate! < $1.releaseDate! }
+            
+        } catch {
+            print("Error loading sets, \(error)")
+        }
+        
+        tableView.reloadData()
+    }
+    
+    
+    
+    
+    @IBAction func ReloadButtonPressed(_ sender: UIBarButtonItem) {
+        print("reload button pressed")
+        getCardSetData(url: baseURL)
+    }
 }
