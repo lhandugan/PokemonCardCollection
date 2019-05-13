@@ -57,10 +57,6 @@ class SetListViewController : UITableViewController {
         let destinationVC = segue.destination as! CardListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            if cardSetArray[indexPath.row].needToUpdate {
-                getCardData(cardSetArray[indexPath.row])
-            }
-            
             destinationVC.selectedCardSet = cardSetArray[indexPath.row]
             print("destinationVC card set array set")
         }
@@ -259,5 +255,12 @@ class SetListViewController : UITableViewController {
     @IBAction func ReloadButtonPressed(_ sender: UIBarButtonItem) {
         print("reload button pressed")
         getCardSetData(url: setBaseURL)
+        
+        for cardSet in cardSetArray {
+            if cardSet.needToUpdate == true {
+                getCardData(cardSet)
+                print("updated card data for \(cardSet.name!)")
+            }
+        }
     }
 }
