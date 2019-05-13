@@ -8,33 +8,22 @@
 
 import UIKit
 import CoreData
-import Alamofire
-import SwiftyJSON
 
 class CardListViewController: UITableViewController {
     
     var cardArray = [Card]()
-    var selectedCardSet : CardSet?
+    var selectedCardSet : CardSet?  {
+        didSet{
+            loadCards()
+            print("load cards called")
+        }
+    }
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
-    let baseURL = "https://api.pokemontcg.io/v1/cards"
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        
-        
-        if  let setCode = selectedCardSet?.code {
-            let endURL = "?setCode=\(setCode)"
-            let finalURL = baseURL + endURL
-            print(finalURL)
-            getData(url: finalURL)
         }
-        
-        
-        
-    }
     
     //MARK: - Tableview Datasource Methods
     
@@ -57,47 +46,22 @@ class CardListViewController: UITableViewController {
     
     
     
-    //MARK: - Networking
+    //MARK: - CoreData
     
-    func getData (url: String) {
+    func loadCards() {
+        let request : NSFetchRequest<Card> = Card.fetchRequest()
+        request.predicate = NSPredicate(format: "parentSet.code == %@", selectedCardSet!.code!)
         
-        Alamofire.request(url, method: .get).responseJSON { response in
-            if response.result.isSuccess {
-                //print("Success! Got the pokemon data")
-                let responseJSON : JSON = JSON(response.result.value!)
-                
-                self.updateData(json: responseJSON)
-                
-            } else {
-                print("Error: \(String(describing: response.result.error))")
-            }
-            
-            
-        }
-    }
-    
-    //MARK: - JSON Parsing
-    
-    func updateData (json : JSON) {
-        var newCardArray = [Card]()
-        //print(json)
-        
-        for (_,card):(String, JSON) in json["cards"] {
-            //print(card)
-            let newCard = Card(context: self.context)
-            newCard.name = card["name"].stringValue
-            newCard.id = card["id"].stringValue
-            newCard.number = card["number"].int64Value
-            
-            newCardArray.append(newCard)
+        do {
+            cardArray = try context.fetch(request)
+            cardArray.sort { $0.number < $1.number }
+        } catch {
+            print("Error loading cards for set, \(error)")
         }
         
-        let sortedNewCardArray = newCardArray.sorted {  $0.number < $1.number  }
-        
-        self.cardArray = sortedNewCardArray
-        
-        self.tableView.reloadData()
+        tableView.reloadData()
     }
     
+ 
     
 }

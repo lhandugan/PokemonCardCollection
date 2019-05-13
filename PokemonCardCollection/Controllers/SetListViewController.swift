@@ -16,8 +16,9 @@ class SetListViewController : UITableViewController {
     
     var cardSetArray = [CardSet]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    let baseURL = "https://api.pokemontcg.io/v1/sets"
-    
+    let setBaseURL = "https://api.pokemontcg.io/v1/sets"
+    let cardBaseURL = "https://api.pokemontcg.io/v1/cards"
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,11 +53,18 @@ class SetListViewController : UITableViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
         let destinationVC = segue.destination as! CardListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
+            if cardSetArray[indexPath.row].needToUpdate {
+                getCardData(cardSetArray[indexPath.row])
+            }
+            
             destinationVC.selectedCardSet = cardSetArray[indexPath.row]
+            print("destinationVC card set array set")
         }
+        
         
     }
     
@@ -68,7 +76,7 @@ class SetListViewController : UITableViewController {
         
         Alamofire.request(url, method: .get).responseJSON { response in
             if response.result.isSuccess {
-                print("Success! Got the pokemon data")
+                print("Success! Got the pokemon card set data")
                 let responseJSON : JSON = JSON(response.result.value!)
                 
                 self.updateCardSetData(json: responseJSON)
@@ -79,6 +87,10 @@ class SetListViewController : UITableViewController {
             
         }
     }
+    
+    
+
+    
     
     //MARK: - JSON handling
     
@@ -105,7 +117,7 @@ class SetListViewController : UITableViewController {
 
         cardSetArray.sort { $0.releaseDate! < $1.releaseDate! }
         
-        saveCardSets()
+        saveData()
     }
     
     func createNewCardSet (_ cardSet: JSON) -> CardSet {
@@ -144,9 +156,69 @@ class SetListViewController : UITableViewController {
     
     
     
+    
+    func getCardData (_ cardSet : CardSet) {
+        
+        let endURL = "?setCode=\(cardSet.code ?? "")"
+        let finalURL = cardBaseURL + endURL
+        print(finalURL)
+        
+        Alamofire.request(finalURL, method: .get).responseJSON { response in
+            if response.result.isSuccess {
+                print("Success! Got the pokemon card data")
+                let responseJSON : JSON = JSON(response.result.value!)
+                
+                self.updateCardData(cardSet: cardSet, json: responseJSON)
+                
+            } else {
+                print("Error: \(String(describing: response.result.error))")
+            }
+        }
+    }
+    
+    func updateCardData (cardSet: CardSet, json : JSON) {
+        //print(json)
+        
+        var cardArray = loadCards(set: cardSet)
+        
+        for (_,card):(String,JSON) in json["cards"] {
+            
+            //Check if card is already in Core Data
+            //If yes, update it.
+            //If no, add it.
+            
+            if let index = cardArray.firstIndex(where: {$0.id == card["id"].stringValue}) {
+                cardArray[index].name = card["name"].stringValue
+                cardArray[index].rarity = card["rarity"].stringValue
+                cardArray[index].number = card["number"].int64Value
+                
+            } else {
+                let newCard = Card(context: context)
+                newCard.name = card["name"].stringValue
+                newCard.id = card["id"].stringValue
+                newCard.number = card["number"].int64Value
+                newCard.rarity = card["rarity"].stringValue
+                newCard.parentSet = cardSet
+                
+                cardArray.append(newCard)
+            }
+
+        }
+        
+        cardSet.needToUpdate = false
+        saveData()
+        print("card data saved")
+        
+
+    }
+    
+    
+    
     //MARK: - CoreData
     
-    func loadCardSets (with request: NSFetchRequest<CardSet> = CardSet.fetchRequest()) {
+    func loadCardSets () {
+        
+        let request : NSFetchRequest<CardSet> = CardSet.fetchRequest()
         
         do {
             cardSetArray = try context.fetch(request)
@@ -159,20 +231,33 @@ class SetListViewController : UITableViewController {
         tableView.reloadData()
     }
     
-    func saveCardSets() {
+    func saveData() {
         
         do {
             try context.save()
         } catch {
-            print("Error saving sets, \(error)")
+            print("Error saving data, \(error)")
         }
         
         tableView.reloadData()
     }
     
+    func loadCards (set : CardSet) -> [Card] {
+        let request : NSFetchRequest<Card> = Card.fetchRequest()
+        var cardArray = [Card]()
+        
+        do {
+            cardArray = try context.fetch(request)
+        } catch {
+            print("Error loading cards for set, \(error)")
+        }
+        
+        return cardArray
+        
+    }
     
     @IBAction func ReloadButtonPressed(_ sender: UIBarButtonItem) {
         print("reload button pressed")
-        getCardSetData(url: baseURL)
+        getCardSetData(url: setBaseURL)
     }
 }
