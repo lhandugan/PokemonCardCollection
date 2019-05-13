@@ -4,18 +4,21 @@
         <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="number" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
-        <relationship name="parentSet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Set" inverseName="cards" inverseEntity="Set" syncable="YES"/>
+        <attribute name="rarity" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="parentSet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CardSet" inverseName="cards" inverseEntity="CardSet" syncable="YES"/>
     </entity>
-    <entity name="Set" representedClassName="Set" syncable="YES" codeGenerationType="class">
+    <entity name="CardSet" representedClassName="CardSet" syncable="YES" codeGenerationType="class">
         <attribute name="code" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="logoUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="releaseDate" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="symbolUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="totalCards" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="updatedAt" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="cards" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Card" inverseName="parentSet" inverseEntity="Card" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Card" positionX="342.65625" positionY="0.43359375" width="128" height="103"/>
-        <element name="Set" positionX="113.1875" positionY="-43.2265625" width="128" height="133"/>
+        <element name="Card" positionX="342.65625" positionY="0.43359375" width="128" height="118"/>
+        <element name="CardSet" positionX="113.1875" positionY="-43.2265625" width="128" height="165"/>
     </elements>
 </model>

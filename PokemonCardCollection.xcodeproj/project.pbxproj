@@ -14,6 +14,7 @@
 		F9EE682C2287974700C8566C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9EE682B2287974700C8566C /* Assets.xcassets */; };
 		F9EE682F2287974700C8566C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F9EE682D2287974700C8566C /* LaunchScreen.storyboard */; };
 		F9EE683922879EAD00C8566C /* CardListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9EE683822879EAD00C8566C /* CardListViewController.swift */; };
+		F9EE683F2287E39900C8566C /* SetListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9EE683E2287E39900C8566C /* SetListViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		F9EE682E2287974700C8566C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F9EE68302287974700C8566C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9EE683822879EAD00C8566C /* CardListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListViewController.swift; sourceTree = "<group>"; };
+		F9EE683E2287E39900C8566C /* SetListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetListViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				F9EE683822879EAD00C8566C /* CardListViewController.swift */,
+				F9EE683E2287E39900C8566C /* SetListViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -246,6 +249,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F9EE683922879EAD00C8566C /* CardListViewController.swift in Sources */,
+				F9EE683F2287E39900C8566C /* SetListViewController.swift in Sources */,
 				F9EE682A2287974600C8566C /* PokemonCardCollection.xcdatamodeld in Sources */,
 				F9EE68222287974600C8566C /* AppDelegate.swift in Sources */,
 			);

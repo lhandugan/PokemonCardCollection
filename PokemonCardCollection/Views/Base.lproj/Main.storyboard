@@ -36,7 +36,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6jE-xv-Fv9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="184.05797101449278" y="25.446428571428569"/>
+            <point key="canvasLocation" x="1022" y="25"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="t3P-td-Pwh">
@@ -49,12 +49,44 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="bQG-9i-g7W" kind="relationship" relationship="rootViewController" id="Xtq-c3-mGL"/>
+                        <segue destination="jYM-0g-CUr" kind="relationship" relationship="rootViewController" id="rvg-5F-j0v"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bhf-d8-gDi" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-726.08695652173924" y="25.446428571428569"/>
+        </scene>
+        <!--Set List View Controller-->
+        <scene sceneID="fnE-RX-29o">
+            <objects>
+                <tableViewController id="jYM-0g-CUr" customClass="SetListViewController" customModule="PokemonCardCollection" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="fGF-fN-rYj">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="SetCell" id="AjV-qX-FKS">
+                                <rect key="frame" x="0.0" y="28" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="AjV-qX-FKS" id="hqX-JW-rnU">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="jYM-0g-CUr" id="asa-sX-3Iw"/>
+                            <outlet property="delegate" destination="jYM-0g-CUr" id="ijm-f4-NGL"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="TDc-vV-bI3"/>
+                    <connections>
+                        <segue destination="bQG-9i-g7W" kind="show" identifier="goToCards" id="KBT-YX-xFI"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bTW-Vf-cqo" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="168" y="25"/>
         </scene>
     </scenes>
 </document>

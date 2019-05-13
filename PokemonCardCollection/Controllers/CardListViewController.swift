@@ -14,9 +14,7 @@ import SwiftyJSON
 class CardListViewController: UITableViewController {
     
     var cardArray = [Card]()
-    
-    
-    
+    var selectedCardSet : CardSet?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     let baseURL = "https://api.pokemontcg.io/v1/cards"
@@ -28,6 +26,7 @@ class CardListViewController: UITableViewController {
     
         //let endURL = "?setCode=base1&name=char"
         let endURL = "?setCode=base1"
+        //let endURL = "/xy7-54" //probably not going to do this here
         let finalURL = baseURL + endURL
         print(finalURL)
         getData(url: finalURL)
@@ -62,9 +61,9 @@ class CardListViewController: UITableViewController {
         Alamofire.request(url, method: .get).responseJSON { response in
             if response.result.isSuccess {
                 //print("Success! Got the pokemon data")
-                let cardsJSON : JSON = JSON(response.result.value!)["cards"]
+                let responseJSON : JSON = JSON(response.result.value!)
                 
-                self.updateCardData(json: cardsJSON)
+                self.updateData(json: responseJSON)
                 
             } else {
                 print("Error: \(String(describing: response.result.error))")
@@ -76,11 +75,11 @@ class CardListViewController: UITableViewController {
     
     //MARK: - JSON Parsing
     
-    func updateCardData (json : JSON) {
+    func updateData (json : JSON) {
         var newCardArray = [Card]()
-        //print(cardsJSON)
+        //print(json)
         
-        for (_,card):(String, JSON) in json {
+        for (_,card):(String, JSON) in json["cards"] {
             //print(card)
             let newCard = Card(context: self.context)
             newCard.name = card["name"].stringValue
@@ -89,6 +88,7 @@ class CardListViewController: UITableViewController {
             
             newCardArray.append(newCard)
         }
+        
         let sortedNewCardArray = newCardArray.sorted {  $0.number < $1.number  }
         
         self.cardArray = sortedNewCardArray
